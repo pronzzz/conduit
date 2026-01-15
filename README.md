@@ -9,7 +9,7 @@
 
 **SysArch Interactive** is a web-based educational tool that allows users to interactively build, simulate, and understand complex distributed system architectures. It combines a physics-based particle engine with a drag-and-drop builder to visualize traffic flow, latency, and load balancing in real-time.
 
-![SysArch Interactive Snapshot](/Users/pranavdwivedi/.gemini/antigravity/brain/0d33dfe1-ace2-49bb-818e-3ad927e191a4/properties_panel_edit_1768520437921.png)
+![SysArch Interactive Snapshot](docs/images/properties_panel.png)
 
 ## Features
 
@@ -81,23 +81,23 @@
 
 ### Phase 1: The Engine
 We implemented a custom physics engine using `requestAnimationFrame` to handle thousands of particles efficiently.
-![Simulation](/Users/pranavdwivedi/.gemini/antigravity/brain/0d33dfe1-ace2-49bb-818e-3ad927e191a4/simulation_running_png_1768519199882.png)
+![Simulation](docs/images/simulation_running.png)
 
 ### Phase 2: The Builder
 An infinite canvas with pan/zoom capabilities and drag-and-drop node placement.
-![Builder UI](/Users/pranavdwivedi/.gemini/antigravity/brain/0d33dfe1-ace2-49bb-818e-3ad927e191a4/builder_ui_png_1768519438858.png)
+![Builder UI](docs/images/builder_ui.png)
 
 ### Phase 3: Logic & Load Balancing
 Implemented intelligent routing. Load balancers split traffic between multiple servers.
-![Load Balancing](/Users/pranavdwivedi/.gemini/antigravity/brain/0d33dfe1-ace2-49bb-818e-3ad927e191a4/load_balancing_active_1768519763872.png)
+![Load Balancing](docs/images/load_balancing.png)
 
 ### Phase 4: Database & Cache
 Added realistic behaviors. Databases simulate delay, and Caches intercept requests.
-![Cache/DB](/Users/pranavdwivedi/.gemini/antigravity/brain/0d33dfe1-ace2-49bb-818e-3ad927e191a4/cache_db_latency_png_1768520083689.png)
+![Cache/DB](docs/images/cache_db.png)
 
 ### Phase 5: Polish
 Finalized with a Properties Inspector for runtime changes and visual health indicators.
-![Properties Panel](/Users/pranavdwivedi/.gemini/antigravity/brain/0d33dfe1-ace2-49bb-818e-3ad927e191a4/properties_panel_edit_1768520437921.png)
+![Properties Panel](docs/images/properties_panel.png)
 
 ## License
 
