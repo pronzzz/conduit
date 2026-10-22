@@ -1,22 +1,19 @@
 {
-  "name": "sysarch-interactive",
+  "name": "conduit",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "test": "vitest run",
+    "typecheck": "tsc -b"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "konva": "^10.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-konva": "^19.2.1",
-    "tailwind-merge": "^3.4.0",
-    "uuid": "^13.0.0",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
@@ -25,17 +22,16 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^5.1.1",
-    "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
-    "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
-  }
+    "vite": "^7.2.4",
+    "vitest": "^3.2.7"
+  },
+  "description": "A deterministic, real-time playground for distributed system design."
 }

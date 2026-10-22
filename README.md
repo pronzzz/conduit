@@ -1,104 +1,91 @@
-# SysArch Interactive
-**A deterministic system design simulator for visualizing and testing distributed architectures.**
+# Conduit
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![React](https://img.shields.io/badge/React-18-blue?logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+**A deterministic, real-time playground for distributed system design.**
 
-**SysArch Interactive** is a web-based educational tool that allows users to interactively build, simulate, and understand complex distributed system architectures. It combines a physics-based particle engine with a drag-and-drop builder to visualize traffic flow, latency, and load balancing in real-time.
+Sketch an architecture of clients, load balancers, servers, caches and databases. Then watch every request move through it. Conduit models worker pools, queues, back-pressure and failures, so you can see *why* a system slows down, not just that it does.
 
-![SysArch Interactive Snapshot](docs/images/properties_panel.png)
+[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 
-## Features
+> Conduit is the 2.0 rewrite of **SysArch Interactive**.
 
-*   **Interactive Builder**: Drag and drop components onto an infinite canvas to design your architecture.
-*   **Physics-Based Simulation**: Visualize individual requests as particles traveling through your system.
-*   **Real-Time Configuration**: Adjust parameters like Latency, RPS, and Capacity on the fly.
-*   **Component Types**:
-    *   **Client**: Generates traffic with configurable Requests Per Second (RPS).
-    *   **Load Balancer**: Distributes traffic using Round Robin/Random logic.
-    *   **Server**: Processes requests with concurrent capacity limits.
-    *   **Database**: Simulates processing latency (requests wait at the node).
-    *   **Cache**: Implements Hit/Miss logic to optimize traffic flow.
-*   **Visual Feedback**: Nodes change color based on health/load; queue sizes are visualized.
-*   **Export**: Save your architecture designs as high-resolution images.
+## What it does
 
-## Getting Started
+- **One dot per request.** White dots head toward the backend, green dots are successful responses, and red dots failed. Each response retraces the exact path its request took.
+- **A real queueing model.** Servers and databases have a fixed number of workers and a bounded queue. Anything beyond that is rejected. Servers keep a worker busy while they wait on downstream calls, so a slow database backs up into everything upstream.
+- **Deterministic.** The engine uses a fixed 120 Hz timestep and a seeded RNG. Reset replays exactly the same traffic, so before/after comparisons are fair.
+- **Live metrics.** Throughput, success rate, p50/p95/p99 latency and in-flight requests, with sparklines. Each node shows its own utilisation, queue depth, rejections and cache hit rate.
+- **Failure injection.** Take any node down (`X`). Balancers route around nodes that are down, the way health checks would.
+- **Load-balancing strategies.** Round robin, least connections and random.
+- **Bursty or steady traffic.** Poisson arrivals show why queues build well below 100% utilisation.
+- **Distance is latency.** About 1 ms per 3 px, so layout matters. Playback starts at ¼× so the dots are easy to follow; 1× is real time.
 
-### Prerequisites
+### Editing
 
-*   Node.js (v16+)
-*   npm or yarn
+- Drag components from the left dock, or press `1`–`5`.
+- Drag from a node's right-edge handle to another node to connect them. Loops and duplicate edges are blocked.
+- Full undo/redo, duplicate, rename (double-click a node), and snap-to-grid (hold `Alt` to move freely).
+- Autosaves locally. **Share links** carry the whole design compressed in the URL hash; nothing is uploaded.
+- Export PNG, export/import JSON, and four starter templates.
+- Light and dark themes. Works with mouse, trackpad (pinch to zoom) and touch.
 
-### Installation
+## Shortcuts
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/pronzzz/sysarch-interactive.git
-    cd sysarch-interactive
-    ```
+| Key | Action |
+| --- | --- |
+| `Space` | Run / pause |
+| `R` | Reset traffic (same seed) |
+| `F` | Fit to view |
+| `1`–`5` | Add client, balancer, server, cache, database |
+| `⌫` | Delete selection |
+| `⌘D` | Duplicate |
+| `X` | Take node down / up |
+| `⌘Z` / `⇧⌘Z` | Undo / redo |
+| `+` / `−` | Zoom |
+| `?` | Help |
 
-2.  Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+## Getting started
 
-3.  Start the development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test         # engine test suite
+npm run build    # type-check + production build
+```
 
-4.  Open http://localhost:5173 to start building!
+Requires Node 20+.
 
-## Usage Guide
+## How it's built
 
-### 1. Building an Architecture
-- Open the **Toolbar** on the left.
-- Drag components (Client, Server, LB, DB, Cache) onto the canvas.
-- Click a **Source** node and then a **Target** node to create a connection (Edge).
+```
+src/
+  core/     Graph model, kind specs, validation, templates (no DOM)
+  sim/      Simulation engine, latency windows, seeded RNG + tests
+  canvas/   Renderer, camera, pointer interaction, frame loop
+  state/    Zustand editor store (undo/redo), persistence, live stats
+  ui/       React chrome: top bar, dock, inspector, metrics, help
+```
 
-### 2. Configuring Nodes
-- Click on any node to select it.
-- Uses the **Properties Panel** on the right to adjust settings:
-    - **Client**: Increase RPS to generate more load.
-    - **Server**: Adjust Capacity to see how it handles concurrency.
-    - **Database**: Increase Latency to simulate slow queries.
-    - **Cache**: Adjust Hit Rate to see the effect on backend load.
+- **Engine and UI are separate.** `sim/` is plain TypeScript with no React. Packets are pooled, queues are O(1), and responses follow an explicit call path rather than guessing the upstream node.
+- **One canvas, one loop.** Grid, edges, nodes and packets are drawn on a single HiDPI 2D canvas. Packets are batched into nine draw calls per frame however many are in flight. The loop sleeps when nothing is moving.
+- **React stays out of the hot path.** The canvas reads the store directly. React only receives a throttled stats snapshot about five times a second.
+- **Motion.** Everything eases with frame-rate-independent exponential smoothing (no overshoot): node positions, selection, hover, utilisation bars, queue badges, zoom (anchored under the cursor), pan momentum and fit-to-view. Deleted nodes and edges fade out instead of vanishing. `prefers-reduced-motion` is respected.
 
-### 3. Simulation
-- Click **START TRAFFIC** in the top-right overlay.
-- Watch particles (requests) flow through the system.
-- Blue/Orange particles are Requests; Green particles are Responses.
-- Nodes will turn **Red** if they are overloaded.
+### Compared with 1.0
 
-## Walkthrough & capabilities
+| | 1.0 | 2.0 |
+| --- | --- | --- |
+| JS bundle (gzip) | 161 KB | 85 KB |
+| Max requests per client | ~60 rps (one spawn per frame) | 400 rps |
+| Load test (4 × 400 rps, ~2,000 in flight) | n/a | steady display refresh, 0 long tasks |
+| Server capacity / queues | not implemented | workers, bounded queues, rejections |
+| Response routing | random upstream edge | exact request path |
+| Determinism | `Math.random` + wall clock | seeded RNG + fixed timestep |
+| Tests | none | engine + graph validation suite |
 
-### Phase 1: The Engine
-We implemented a custom physics engine using `requestAnimationFrame` to handle thousands of particles efficiently.
-![Simulation](docs/images/simulation_running.png)
+## Deploying
 
-### Phase 2: The Builder
-An infinite canvas with pan/zoom capabilities and drag-and-drop node placement.
-![Builder UI](docs/images/builder_ui.png)
-
-### Phase 3: Logic & Load Balancing
-Implemented intelligent routing. Load balancers split traffic between multiple servers.
-![Load Balancing](docs/images/load_balancing.png)
-
-### Phase 4: Database & Cache
-Added realistic behaviors. Databases simulate delay, and Caches intercept requests.
-![Cache/DB](docs/images/cache_db.png)
-
-### Phase 5: Polish
-Finalized with a Properties Inspector for runtime changes and visual health indicators.
-![Properties Panel](docs/images/properties_panel.png)
+It's a static Vite app. On Vercel the framework preset is detected automatically. `vercel.json` adds long-lived caching for the hashed assets.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT, see [LICENSE](LICENSE).

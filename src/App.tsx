@@ -1,17 +1,27 @@
-import { Toolbar } from './components/Toolbar';
-import { GameCanvas } from './components/GameCanvas';
-import { PropertiesPanel } from './components/PropertiesPanel';
+import { useState } from 'react';
+import { Viewport } from './canvas/Viewport';
+import { EmptyState, Help, Metrics, Toast, ZoomControls } from './ui/Hud';
+import { Inspector } from './ui/Inspector';
+import { Palette } from './ui/Palette';
+import { TopBar } from './ui/TopBar';
+import { useShortcuts } from './ui/useShortcuts';
 
-function App() {
+export function App() {
+  const [zoom, setZoom] = useState(1);
+  useShortcuts();
   return (
-    <div className="w-screen h-screen flex bg-slate-950 text-white overflow-hidden">
-      <Toolbar />
-      <main className="flex-1 relative">
-        <GameCanvas />
-      </main>
-      <PropertiesPanel />
-    </div>
+    <main className="relative h-full w-full overflow-hidden bg-bg text-ink select-none">
+      <Viewport onZoom={setZoom} />
+      <EmptyState />
+      <div className="pointer-events-none absolute inset-0">
+        <TopBar />
+        <Palette />
+        <Inspector />
+        <ZoomControls zoom={zoom} />
+        <Metrics />
+        <Toast />
+      </div>
+      <Help />
+    </main>
   );
 }
-
-export default App;
